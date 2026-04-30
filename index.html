@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>한국어 학습기 (Naver Link)</title>
+    <title>한국어 학습기 Master</title>
     <style>
         :root {
             --primary: #2c3e50;
@@ -19,6 +19,7 @@
             background-color: var(--bg);
             margin: 0;
             padding-bottom: 100px;
+            color: var(--primary);
         }
 
         /* 導覽列 */
@@ -28,7 +29,7 @@
             position: sticky;
             top: 0;
             z-index: 1000;
-            overflow-x: auto;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
         }
 
         .tab-btn {
@@ -39,19 +40,25 @@
             font-size: 13px;
             font-weight: bold;
             color: #bdc3c7;
-            white-space: nowrap;
             cursor: pointer;
         }
 
-        .tab-btn.active { color: #fff; border-bottom: 4px solid var(--accent); }
+        .tab-btn.active {
+            color: #fff;
+            border-bottom: 4px solid var(--accent);
+        }
 
         .container { max-width: 500px; margin: 0 auto; padding: 15px; }
         .page { display: none; }
         .page.active { display: block; }
 
         .card {
-            background: #fff; padding: 20px; border-radius: 15px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.05); margin-bottom: 15px;
+            background: #fff;
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            margin-bottom: 15px;
+            text-align: center;
         }
 
         input, textarea {
@@ -60,35 +67,74 @@
             margin-bottom: 10px; outline: none;
         }
 
-        .btn { border: none; border-radius: 10px; font-weight: bold; cursor: pointer; padding: 12px 15px; transition: 0.2s; }
+        .btn {
+            border: none; border-radius: 10px; font-weight: bold;
+            cursor: pointer; padding: 12px 15px; transition: 0.2s;
+        }
+
         .main-btn { width: 100%; background: var(--accent); color: white; }
 
         /* 閱讀區單字樣式 */
         .reading-content {
-            font-size: 20px; line-height: 2.2; text-align: left;
-            background: #fff; padding: 20px; border-radius: 12px;
-            border: 1px solid #eee; margin-bottom: 15px;
+            font-size: 20px;
+            line-height: 2.2;
+            text-align: left;
+            background: #fff;
+            padding: 20px;
+            border-radius: 12px;
+            border: 1px solid #eee;
+            margin-bottom: 15px;
         }
 
         .word-link {
-            display: inline-block; cursor: pointer; padding: 0 2px;
-            border-radius: 4px; color: var(--primary); font-weight: 500;
+            display: inline-block;
+            cursor: pointer;
+            padding: 0 2px;
+            border-radius: 4px;
+            font-weight: 500;
         }
-        .word-link:hover { background-color: #dff9fb; color: #2980b9; text-decoration: underline; }
+        .word-link:hover {
+            background-color: #dff9fb;
+            color: #2980b9;
+            text-decoration: underline;
+        }
 
         /* 單字清單 */
         .vocab-list { list-style: none; padding: 0; }
         .vocab-item {
-            background: #fff; margin-bottom: 8px; padding: 15px;
-            border-radius: 12px; display: flex; justify-content: space-between; align-items: center;
-            border-left: 5px solid var(--accent);
+            background: #fff; margin-bottom: 10px; padding: 15px;
+            border-radius: 12px; display: flex; justify-content: space-between;
+            align-items: center; border-left: 5px solid var(--accent);
         }
 
         /* 懸浮按鈕 */
-        .scroll-nav { position: fixed; right: 15px; bottom: 100px; display: flex; flex-direction: column; gap: 10px; z-index: 2000; }
-        .scroll-btn { width: 45px; height: 45px; border-radius: 50%; background: var(--primary); color: white; border: none; font-size: 18px; display: flex; align-items: center; justify-content: center; opacity: 0.8; }
+        .scroll-nav {
+            position: fixed;
+            right: 15px;
+            bottom: 100px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            z-index: 2000;
+        }
 
-        .chat-bubble { background: #f1f2f6; padding: 15px; border-radius: 15px; margin-bottom: 15px; font-size: 16px; }
+        .scroll-btn {
+            width: 50px; height: 50px; border-radius: 50%;
+            background: var(--primary); color: white; border: none;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+            font-size: 20px; cursor: pointer; display: flex;
+            align-items: center; justify-content: center;
+        }
+
+        .chat-bubble {
+            background: #f1f2f6;
+            padding: 15px;
+            border-radius: 15px;
+            margin-bottom: 15px;
+            text-align: left;
+            font-size: 16px;
+            border-left: 5px solid #bdc3c7;
+        }
     </style>
 </head>
 <body>
@@ -109,25 +155,25 @@
         
         <div id="vocab-page" class="page active">
             <div class="card">
-                <input type="text" id="krInput" placeholder="한국어">
-                <input type="text" id="chInput" placeholder="뜻">
-                <button class="btn main-btn" onclick="addVocab()">추가 (新增)</button>
+                <input type="text" id="krInput" placeholder="한국어 (韓文)">
+                <input type="text" id="chInput" placeholder="뜻 (中文意思)">
+                <button class="btn main-btn" onclick="addVocab()">추가하기 (新增)</button>
             </div>
-            <input type="text" id="searchInput" placeholder="🔍 검색..." style="border: 2px solid var(--accent);" oninput="renderList()">
+            <input type="text" id="searchInput" placeholder="🔍 검색 (搜尋單字...)" style="border: 2px solid var(--accent);" oninput="renderList()">
             <ul class="vocab-list" id="vocabList"></ul>
         </div>
 
         <div id="read-page" class="page">
             <div class="card">
-                <textarea id="readInput" placeholder="在此貼上韓文文章..."></textarea>
-                <button class="btn main-btn" style="background: #8e44ad;" onclick="updateReadContent()">저장 (儲存內容)</button>
+                <textarea id="readInput" placeholder="在此貼上文章..."></textarea>
+                <button class="btn main-btn" style="background: #8e44ad;" onclick="updateReadContent()">저장 (儲存)</button>
             </div>
             <div class="card">
-                <p style="font-size:12px; color:gray; margin-bottom:10px;">💡 提示：點擊單字直接開啟 Naver 韓中字典</p>
+                <p style="font-size:12px; color:gray; margin-bottom:10px;">💡 點擊單字開啟 Naver 韓中字典</p>
                 <div id="displayArea" class="reading-content">내용을 입력하세요.</div>
                 <div style="display:flex; gap:10px;">
                     <button class="btn" style="flex:2; background:var(--success); color:white" onclick="speak(getRawText())">🔊 읽기 (朗讀)</button>
-                    <button class="btn" style="flex:1; background:var(--danger); color:white" onclick="window.speechSynthesis.cancel()">🛑🛑</button>
+                    <button class="btn" style="flex:1; background:var(--danger); color:white" onclick="window.speechSynthesis.cancel()">🛑 中止</button>
                 </div>
             </div>
         </div>
@@ -135,32 +181,35 @@
         <div id="quiz-page" class="page">
             <div class="card">
                 <h3>🎧 랜덤 리스닝</h3>
-                <button class="btn" style="background:var(--warning); color:white; width:100%" onclick="nextQuiz()">새 문제</button>
+                <button class="btn" style="background:var(--warning); color:white; width:100%" onclick="nextQuiz()">새 문제 (下個題目)</button>
                 <div id="quizBox" style="display:none; margin-top:20px;">
-                    <button class="btn" style="background:var(--success); color:white" onclick="playQuizSound()">🔊 듣기</button>
+                    <button class="btn" style="background:var(--success); color:white" onclick="playQuizSound()">🔊 다시 듣기</button>
                     <div id="quizWord" style="font-size:28px; font-weight:bold; margin:20px 0; visibility:hidden;">? ? ?</div>
-                    <button class="btn" style="background:#bdc3c7" onclick="document.getElementById('quizWord').style.visibility='visible'">정답</button>
+                    <button class="btn" style="background:#bdc3c7" onclick="document.getElementById('quizWord').style.visibility='visible'">정답 확인</button>
                 </div>
             </div>
         </div>
 
         <div id="ai-page" class="page">
             <div class="card">
-                <h3>🤖 AI 대화방</h3>
-                <input type="password" id="apiKey" placeholder="在此輸入 API Key">
-                <div id="aiChat" class="chat-bubble">안녕하세요! 오늘 기분이 어때요?</div>
+                <h3>🤖 AI 대화방 (Gemini v1)</h3>
+                <input type="password" id="apiKey" placeholder="在此貼上 API Key">
+                <div id="aiChat" class="chat-bubble">안녕하세요! API Key를 입력하고 대화를 시작하세요.</div>
+                
                 <div style="display: flex; gap: 5px; margin-bottom: 10px;">
-                    <input type="text" id="aiTextInput" placeholder="打字練習..." style="margin-bottom:0">
-                    <button class="btn" style="background:var(--accent); color:white" onclick="sendTextToAI()">전송</button>
+                    <input type="text" id="aiTextInput" placeholder="輸入韓文回覆..." style="margin-bottom:0">
+                    <button class="btn" style="background:var(--accent); color:white" onclick="sendTextToAI()">傳送</button>
                 </div>
-                <button id="aiMicBtn" style="width:60px; height:60px; border-radius:50%; border:none; background:var(--danger); color:white; font-size:24px;" onclick="startAIConversation()">🎤</button>
+
+                <p style="font-size:12px; color:#7f8c8d;">點擊麥克風練習口說 (需在 HTTPS 網址下)</p>
+                <button id="aiMicBtn" style="width:65px; height:65px; border-radius:50%; border:none; background:var(--danger); color:white; font-size:28px;" onclick="startAIConversation()">🎤</button>
                 <div id="aiUserText" style="font-style:italic; color:var(--accent); min-height:24px; margin-top:10px;"></div>
             </div>
         </div>
 
         <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:30px;">
-            <button class="btn" style="background:#95a5a6; color:white; font-size:12px" onclick="exportData()">📤 백업</button>
-            <button class="btn" style="background:#95a5a6; color:white; font-size:12px" onclick="importData()">📥 가져오기</button>
+            <button class="btn" style="background:#95a5a6; color:white; font-size:12px" onclick="exportData()">📤 備份</button>
+            <button class="btn" style="background:#95a5a6; color:white; font-size:12px" onclick="importData()">📥 匯入</button>
         </div>
     </div>
 
@@ -174,45 +223,97 @@
             processReadingText(savedText);
         });
 
-        // --- 🔗 跳轉 Naver 字典功能 ---
+        // --- 🔗 Naver 詞典跳轉 ---
         function openNaver(word) {
             const cleanWord = word.replace(/[.,!?;:()"'“”]/g, "").trim();
             if (cleanWord) {
-                // 使用 Naver 韓中字典的行動版搜尋網址，最穩定
                 const url = `https://zh.dict.naver.com/#/search?query=${encodeURIComponent(cleanWord)}`;
                 window.open(url, '_blank');
             }
         }
 
-        // --- 📖 處理閱讀文本 ---
+        // --- 🤖 Gemini API v1 穩定版 ---
+        async function callGemini(key, text) {
+            // 使用 v1 穩定路徑
+            const url = `https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=${key}`;
+            try {
+                const res = await fetch(url, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ 
+                        contents: [{ 
+                            parts: [{ text: "너는 친절한 한국어 선생님이야. 16살 수준에 맞춰 한국어로 대답하고 끝에 중국어 번역을 붙여줘: " + text }] 
+                        }] 
+                    })
+                });
+                
+                const data = await res.json();
+
+                if (data.error) {
+                    return "❌ API 錯誤: " + data.error.message;
+                }
+
+                if (data.candidates && data.candidates[0].content.parts[0].text) {
+                    return data.candidates[0].content.parts[0].text;
+                }
+                return "❌ 無法取得回應，請檢查 API Key 權限。";
+            } catch (e) {
+                return "❌ 連線失敗: " + e.message;
+            }
+        }
+
+        async function sendTextToAI() {
+            const k = document.getElementById('apiKey').value.trim();
+            const t = document.getElementById('aiTextInput').value.trim();
+            if(!k) return alert("請先貼上 API Key");
+            if(!t) return;
+
+            document.getElementById('aiUserText').innerText = "나: " + t;
+            document.getElementById('aiChat').innerText = "AI 생각 중...";
+            
+            const r = await callGemini(k, t);
+            document.getElementById('aiChat').innerText = r;
+            speak(r);
+            document.getElementById('aiTextInput').value = "";
+        }
+
+        function startAIConversation() {
+            const Recognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+            if (!Recognition) return alert("瀏覽器不支援語音辨識");
+            const rec = new Recognition();
+            rec.lang = 'ko-KR';
+            rec.onstart = () => document.getElementById('aiMicBtn').style.opacity = 0.5;
+            rec.onend = () => document.getElementById('aiMicBtn').style.opacity = 1;
+            rec.onresult = async (e) => {
+                const userMsg = e.results[0][0].transcript;
+                document.getElementById('aiUserText').innerText = "나: " + userMsg;
+                const r = await callGemini(document.getElementById('apiKey').value.trim(), userMsg);
+                document.getElementById('aiChat').innerText = r;
+                speak(r);
+            };
+            rec.start();
+        }
+
+        // --- 基礎邏輯 ---
         function processReadingText(text) {
-            const area = document.getElementById('displayArea');
-            area.innerHTML = '';
+            const area = document.getElementById('displayArea'); area.innerHTML = '';
             text.split(/(\s+)/).forEach(word => {
                 if (word.trim().length > 0) {
-                    const span = document.createElement('span');
-                    span.className = 'word-link';
-                    span.innerText = word;
-                    span.onclick = () => openNaver(word);
+                    const span = document.createElement('span'); span.className = 'word-link';
+                    span.innerText = word; span.onclick = () => openNaver(word);
                     area.appendChild(span);
-                } else {
-                    area.appendChild(document.createTextNode(word));
-                }
+                } else { area.appendChild(document.createTextNode(word)); }
             });
         }
 
         function updateReadContent() {
             const t = document.getElementById('readInput').value.trim();
-            if(t) { localStorage.setItem('readingText', t); processReadingText(t); document.getElementById('readInput').value = ''; alert("儲存成功！"); }
+            if(t) { localStorage.setItem('readingText', t); processReadingText(t); alert("儲存成功！"); }
         }
 
-        // --- 其他核心功能 ---
-        function speak(text) { window.speechSynthesis.cancel(); const u = new SpeechSynthesisUtterance(text); u.lang = 'ko-KR'; window.speechSynthesis.speak(u); }
-        function getRawText() { return localStorage.getItem('readingText') || ""; }
-        function showPage(id) { document.querySelectorAll('.page').forEach(p => p.classList.remove('active')); document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active')); document.getElementById(id).classList.add('active'); event.currentTarget.classList.add('active'); }
-        function addVocab() { const kr = document.getElementById('krInput'), ch = document.getElementById('chInput'); if(!kr.value || !ch.value) return; const v = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]'); v.unshift({ kr: kr.value.trim(), ch: ch.value.trim() }); localStorage.setItem(STORAGE_KEY, JSON.stringify(v)); renderList(); kr.value = ''; ch.value = ''; }
-        function renderList() { 
-            const list = document.getElementById('vocabList'); const v = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]'); list.innerHTML = '';
+        function renderList() {
+            const list = document.getElementById('vocabList'); const v = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+            list.innerHTML = '';
             v.forEach((item, i) => {
                 const li = document.createElement('li'); li.className = 'vocab-item';
                 li.innerHTML = `<div><div class="kr-text" style="cursor:pointer" onclick="openNaver('${item.kr}')">${item.kr}</div><div>${item.ch}</div></div>
@@ -221,14 +322,24 @@
                 list.appendChild(li);
             });
         }
-        function deleteVocab(i) { if(confirm("確定刪除嗎?")) { const v = JSON.parse(localStorage.getItem(STORAGE_KEY)); v.splice(i,1); localStorage.setItem(STORAGE_KEY, JSON.stringify(v)); renderList(); } }
-        async function callGemini(key, text) { const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${key}`; const res = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ contents: [{ parts: [{ text: "너는 친절한 한국어 선생님이야. 한국어로 대답하고 끝에 중국어 번역을 붙여줘: " + text }] }] }) }); const data = await res.json(); return data.candidates[0].content.parts[0].text; }
-        async function sendTextToAI() { const k = document.getElementById('apiKey').value; const t = document.getElementById('aiTextInput').value; if(!k || !t) return; const r = await callGemini(k, t); document.getElementById('aiChat').innerText = r; speak(r); }
+
+        function addVocab() {
+            const kr = document.getElementById('krInput'), ch = document.getElementById('chInput');
+            if(!kr.value || !ch.value) return;
+            const v = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+            v.unshift({ kr: kr.value.trim(), ch: ch.value.trim() });
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(v)); renderList(); kr.value = ''; ch.value = '';
+        }
+
+        function deleteVocab(i) { if(confirm("確定刪除?")) { const v = JSON.parse(localStorage.getItem(STORAGE_KEY)); v.splice(i,1); localStorage.setItem(STORAGE_KEY, JSON.stringify(v)); renderList(); } }
+        function showPage(id) { document.querySelectorAll('.page').forEach(p => p.classList.remove('active')); document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active')); document.getElementById(id).classList.add('active'); event.currentTarget.classList.add('active'); }
+        function speak(t) { window.speechSynthesis.cancel(); const u = new SpeechSynthesisUtterance(t); u.lang = 'ko-KR'; window.speechSynthesis.speak(u); }
+        function getRawText() { return localStorage.getItem('readingText') || ""; }
         function nextQuiz() { const v = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]'); if(!v.length) return; currentQuiz = v[Math.floor(Math.random()*v.length)]; document.getElementById('quizBox').style.display = 'block'; document.getElementById('quizWord').style.visibility = 'hidden'; document.getElementById('quizWord').innerText = currentQuiz.kr; speak(currentQuiz.kr); }
         function playQuizSound() { if(currentQuiz) speak(currentQuiz.kr); }
-        function exportData() { prompt("備份代碼:", localStorage.getItem(STORAGE_KEY)); }
-        function importData() { const c = prompt("貼上備份代碼:"); if(c){localStorage.setItem(STORAGE_KEY, c); renderList(); alert("匯入成功！");} }
-        function startAIConversation() { alert("GitHub HTTPS 環境才能用麥克風喔！"); }
+        function exportData() { prompt("備份:", localStorage.getItem(STORAGE_KEY)); }
+        function importData() { const c = prompt("貼上:"); if(c){localStorage.setItem(STORAGE_KEY, c); renderList(); alert("Done!");} }
     </script>
 </body>
 </html>
+
