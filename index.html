@@ -37,7 +37,7 @@
     </div>
     <div class="container">
         <div id="vocab-page" class="page active">
-            <div class="card"><input type="text" id="krInput" placeholder="한국어"><input type="text" id="chInput" placeholder="뜻"><button class="btn main-btn" onclick="addVocab()">추가하기</button></div>
+            <div class="card"><input type="text" id="krInput" placeholder="韓文"><input type="text" id="chInput" placeholder="中文意思"><button class="btn main-btn" onclick="addVocab()">추가하기</button></div>
             <input type="text" id="searchInput" placeholder="🔍 搜尋單字..." style="border: 2px solid var(--accent);" oninput="renderList()"><ul class="vocab-list" id="vocabList"></ul>
         </div>
         <div id="read-page" class="page">
@@ -45,11 +45,11 @@
             <div class="card"><div id="displayArea" class="reading-content">내용을 입력하세요.</div><div style="display:flex; gap:10px;"><button class="btn" style="flex:2; background:var(--success); color:white" onclick="speak(getRawText())">🔊 읽기</button><button class="btn" style="flex:1; background:var(--danger); color:white" onclick="window.speechSynthesis.cancel()">🛑 中止</button></div></div>
         </div>
         <div id="quiz-page" class="page">
-            <div class="card"><h3>🎧 랜덤 리스ニング</h3><button class="btn" style="background:var(--warning); color:white; width:100%" onclick="nextQuiz()">새 문제</button><div id="quizBox" style="display:none; margin-top:20px;"><button class="btn" style="background:var(--success); color:white" onclick="playQuizSound()">🔊 다시 듣기</button><div id="quizWord" style="font-size:28px; font-weight:bold; margin:20px 0; visibility:hidden;">? ? ?</div><button class="btn" style="background:#bdc3c7" onclick="document.getElementById('quizWord').style.visibility='visible'">정답 확인</button></div></div>
+            <div class="card"><h3>🎧 랜덤 리스닝</h3><button class="btn" style="background:var(--warning); color:white; width:100%" onclick="nextQuiz()">새 문제</button><div id="quizBox" style="display:none; margin-top:20px;"><button class="btn" style="background:var(--success); color:white" onclick="playQuizSound()">🔊 다시 듣기</button><div id="quizWord" style="font-size:28px; font-weight:bold; margin:20px 0; visibility:hidden;">? ? ?</div><button class="btn" style="background:#bdc3c7" onclick="document.getElementById('quizWord').style.visibility='visible'">정답 확인</button></div></div>
         </div>
         <div id="ai-page" class="page">
             <div class="card">
-                <h3>🤖 AI 대화房 (Gemini v1.0.5)</h3>
+                <h3>🤖 AI 대화房 (Gemini v1.0.6)</h3>
                 <input type="password" id="apiKey" placeholder="在此貼上 API Key">
                 <div id="aiChat" class="chat-bubble">안녕하세요! 오늘 기분이 어때요?</div>
                 <div style="display: flex; gap: 5px; margin-bottom: 10px;"><input type="text" id="aiTextInput" placeholder="輸入韓文..." style="margin-bottom:0"><button class="btn" style="background:var(--accent); color:white" onclick="sendTextToAI()">傳送</button></div>
@@ -62,33 +62,32 @@
     <script>
         const STORAGE_KEY = 'myKoreanApp_v2'; let currentQuiz = null;
         document.addEventListener('DOMContentLoaded', () => { renderList(); processReadingText(localStorage.getItem('readingText') || "내용을 입력하세요."); });
-        function openNaver(w) { const c = w.replace(/[.,!?;:()"'“”]/g, "").trim(); if (c) window.open(`https://zh.dict.naver.com/#/search?query=${encodeURIComponent(c)}`, '_blank'); }
+        function openNaver(w) { const c = w.replace(/[.,!?;:()"'**/g, "").trim(); if (c) window.open(`https://zh.dict.naver.com/#/search?query=${encodeURIComponent(c)}`, '_blank'); }
 
-        // --- 🤖 1.0.5 版：強制回歸 v1beta 地址 ---
+        // --- 🤖 1.0.6 版：回歸最穩定的 gemini-pro 模型 ---
         async function callGemini(key, text) {
-            // 注意：這裡是 v1beta，並且模型名稱是完整路徑
-            const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${key.trim()}`;
+            // 使用最穩定的 v1beta + gemini-pro 組合
+            const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${key.trim()}`;
             
             try {
                 const res = await fetch(url, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
-                        contents: [{ parts: [{ text: "你是一位親切的韓文老師，請用韓文跟我對話，並在最後附上中文翻譯： " + text }] }]
+                        contents: [{ parts: [{ text: "你是親切的韓文老師，請用韓文跟我對話，並附上中文翻譯： " + text }] }]
                     })
                 });
                 
                 const data = await res.json();
 
                 if (data.error) {
-                    // 如果還是 404，回報詳細訊息
                     return "❌ API 錯誤: " + data.error.message + " (" + data.error.status + ")";
                 }
 
                 if (data.candidates && data.candidates[0].content.parts[0].text) {
                     return data.candidates[0].content.parts[0].text;
                 }
-                return "❌ 伺服器回傳空回應。";
+                return "❌ 回傳異常，建議重新申請一組 Key 試試看。";
             } catch (e) {
                 return "❌ 連線失敗: " + e.message;
             }
@@ -97,7 +96,7 @@
         async function sendTextToAI() {
             const k = document.getElementById('apiKey').value; 
             const t = document.getElementById('aiTextInput').value.trim();
-            if(!k || !t) return alert("請貼上 Key 並輸入內容");
+            if(!k || !t) return alert("請輸入內容");
             document.getElementById('aiUserText').innerText = "나: " + t;
             document.getElementById('aiChat').innerText = "AI 생각 중...";
             const r = await callGemini(k, t);
