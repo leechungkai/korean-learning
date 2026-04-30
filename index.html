@@ -33,23 +33,23 @@
         <button class="tab-btn active" onclick="showPage('vocab-page')">단어장<br>(單字)</button>
         <button class="tab-btn" onclick="showPage('read-page')">읽기 연습<br>(閱讀)</button>
         <button class="tab-btn" onclick="showPage('quiz-page')">도전 모드<br>(挑戰)</button>
-        <button class="tab-btn" onclick="showPage('ai-page')">AI 대話<br>(對話)</button>
+        <button class="tab-btn" onclick="showPage('ai-page')">AI 대화<br>(對話)</button>
     </div>
     <div class="container">
         <div id="vocab-page" class="page active">
-            <div class="card"><input type="text" id="krInput" placeholder="한국어 (韓文)"><input type="text" id="chInput" placeholder="뜻 (中文意思)"><button class="btn main-btn" onclick="addVocab()">추가하기</button></div>
-            <input type="text" id="searchInput" placeholder="🔍搜尋單字..." style="border: 2px solid var(--accent);" oninput="renderList()"><ul class="vocab-list" id="vocabList"></ul>
+            <div class="card"><input type="text" id="krInput" placeholder="한국어"><input type="text" id="chInput" placeholder="뜻"><button class="btn main-btn" onclick="addVocab()">추가하기</button></div>
+            <input type="text" id="searchInput" placeholder="🔍 搜尋單字..." style="border: 2px solid var(--accent);" oninput="renderList()"><ul class="vocab-list" id="vocabList"></ul>
         </div>
         <div id="read-page" class="page">
             <div class="card"><textarea id="readInput" placeholder="在此貼上文章..."></textarea><button class="btn main-btn" style="background: #8e44ad;" onclick="updateReadContent()">저장</button></div>
             <div class="card"><div id="displayArea" class="reading-content">내용을 입력하세요.</div><div style="display:flex; gap:10px;"><button class="btn" style="flex:2; background:var(--success); color:white" onclick="speak(getRawText())">🔊 읽기</button><button class="btn" style="flex:1; background:var(--danger); color:white" onclick="window.speechSynthesis.cancel()">🛑 中止</button></div></div>
         </div>
         <div id="quiz-page" class="page">
-            <div class="card"><h3>🎧 랜덤 리스닝</h3><button class="btn" style="background:var(--warning); color:white; width:100%" onclick="nextQuiz()">새 문제</button><div id="quizBox" style="display:none; margin-top:20px;"><button class="btn" style="background:var(--success); color:white" onclick="playQuizSound()">🔊 다시 듣기</button><div id="quizWord" style="font-size:28px; font-weight:bold; margin:20px 0; visibility:hidden;">? ? ?</div><button class="btn" style="background:#bdc3c7" onclick="document.getElementById('quizWord').style.visibility='visible'">정답 확인</button></div></div>
+            <div class="card"><h3>🎧 랜덤 리스ニング</h3><button class="btn" style="background:var(--warning); color:white; width:100%" onclick="nextQuiz()">새 문제</button><div id="quizBox" style="display:none; margin-top:20px;"><button class="btn" style="background:var(--success); color:white" onclick="playQuizSound()">🔊 다시 듣기</button><div id="quizWord" style="font-size:28px; font-weight:bold; margin:20px 0; visibility:hidden;">? ? ?</div><button class="btn" style="background:#bdc3c7" onclick="document.getElementById('quizWord').style.visibility='visible'">정답 확인</button></div></div>
         </div>
         <div id="ai-page" class="page">
             <div class="card">
-                <h3>🤖 AI 대화방 (Gemini v1.0.4)</h3>
+                <h3>🤖 AI 대화房 (Gemini v1.0.5)</h3>
                 <input type="password" id="apiKey" placeholder="在此貼上 API Key">
                 <div id="aiChat" class="chat-bubble">안녕하세요! 오늘 기분이 어때요?</div>
                 <div style="display: flex; gap: 5px; margin-bottom: 10px;"><input type="text" id="aiTextInput" placeholder="輸入韓文..." style="margin-bottom:0"><button class="btn" style="background:var(--accent); color:white" onclick="sendTextToAI()">傳送</button></div>
@@ -64,32 +64,33 @@
         document.addEventListener('DOMContentLoaded', () => { renderList(); processReadingText(localStorage.getItem('readingText') || "내용을 입력하세요."); });
         function openNaver(w) { const c = w.replace(/[.,!?;:()"'“”]/g, "").trim(); if (c) window.open(`https://zh.dict.naver.com/#/search?query=${encodeURIComponent(c)}`, '_blank'); }
 
-        // --- 🤖 1.0.4 穩定版：單一模型連線測試 ---
+        // --- 🤖 1.0.5 版：強制回歸 v1beta 地址 ---
         async function callGemini(key, text) {
-            // 直接使用穩定版路徑，這也是官方目前推薦的方式
-            const url = `https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=${key.trim()}`;
+            // 注意：這裡是 v1beta，並且模型名稱是完整路徑
+            const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${key.trim()}`;
             
             try {
                 const res = await fetch(url, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
-                        contents: [{ parts: [{ text: "너는 친절한 한국어 선생님이야. 한국어로 대답하고 끝에 중국어 번역을 붙여줘: " + text }] }]
+                        contents: [{ parts: [{ text: "你是一位親切的韓文老師，請用韓文跟我對話，並在最後附上中文翻譯： " + text }] }]
                     })
                 });
                 
                 const data = await res.json();
 
                 if (data.error) {
-                    return "❌ 錯誤訊息: " + data.error.message + " (" + data.error.status + ")";
+                    // 如果還是 404，回報詳細訊息
+                    return "❌ API 錯誤: " + data.error.message + " (" + data.error.status + ")";
                 }
 
                 if (data.candidates && data.candidates[0].content.parts[0].text) {
                     return data.candidates[0].content.parts[0].text;
                 }
-                return "❌ 收到空回應，請檢查 Key 是否有權限。";
+                return "❌ 伺服器回傳空回應。";
             } catch (e) {
-                return "❌ 網路問題: " + e.message + " (請確認是否有開啟 VPN 或擋廣告功能)";
+                return "❌ 連線失敗: " + e.message;
             }
         }
 
@@ -134,4 +135,3 @@
     </script>
 </body>
 </html>
-
