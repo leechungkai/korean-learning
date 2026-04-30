@@ -23,7 +23,7 @@
         .vocab-list { list-style: none; padding: 0; text-align: left; }
         .vocab-item { background: #fff; margin-bottom: 10px; padding: 15px; border-radius: 12px; display: flex; justify-content: space-between; align-items: center; border-left: 5px solid var(--accent); }
         .scroll-nav { position: fixed; right: 15px; bottom: 100px; display: flex; flex-direction: column; gap: 12px; z-index: 2000; }
-        .scroll-btn { width: 50px; height: 50px; border-radius: 50%; background: var(--primary); color: white; border: none; font-size: 20px; display: flex; align-items: center; justify-content: center; }
+        .scroll-btn { width: 50px; height: 50px; border-radius: 50%; background: var(--primary); color: white; border: none; font-size: 20px; display: flex; align-items: center; justify-content: center; cursor: pointer; }
         .chat-bubble { background: #f1f2f6; padding: 15px; border-radius: 15px; margin-bottom: 15px; text-align: left; font-size: 16px; border-left: 5px solid #bdc3c7; white-space: pre-wrap; }
     </style>
 </head>
@@ -39,20 +39,24 @@
         <button class="tab-btn" onclick="showPage('ai-page')">AI 대화<br>(對話)</button>
     </div>
     <div class="container">
+        
         <div id="vocab-page" class="page active">
             <div class="card"><input type="text" id="krInput" placeholder="韓文"><input type="text" id="chInput" placeholder="中文意思"><button class="btn main-btn" onclick="addVocab()">추가하기</button></div>
             <input type="text" id="searchInput" placeholder="🔍 搜尋單字..." style="border: 2px solid var(--accent);" oninput="renderList()"><ul class="vocab-list" id="vocabList"></ul>
         </div>
+
         <div id="read-page" class="page">
             <div class="card"><textarea id="readInput" placeholder="在此貼上文章..."></textarea><button class="btn main-btn" style="background: #8e44ad;" onclick="updateReadContent()">저장</button></div>
             <div class="card"><div id="displayArea" class="reading-content">내용을 입력하세요.</div><div style="display:flex; gap:10px;"><button class="btn" style="flex:2; background:var(--success); color:white" onclick="speak(getRawText())">🔊 읽기</button><button class="btn" style="flex:1; background:var(--danger); color:white" onclick="window.speechSynthesis.cancel()">🛑 中止</button></div></div>
         </div>
+
         <div id="quiz-page" class="page">
-            <div class="card"><h3>🎧 랜덤 리스ニング</h3><button class="btn" style="background:var(--warning); color:white; width:100%" onclick="nextQuiz()">새 문제</button><div id="quizBox" style="display:none; margin-top:20px;"><button class="btn" style="background:var(--success); color:white" onclick="playQuizSound()">🔊 다시 듣기</button><div id="quizWord" style="font-size:28px; font-weight:bold; margin:20px 0; visibility:hidden;">? ? ?</div><button class="btn" style="background:#bdc3c7" onclick="document.getElementById('quizWord').style.visibility='visible'">정답 확인</button></div></div>
+            <div class="card"><h3>🎧 랜덤 리스닝</h3><button class="btn" style="background:var(--warning); color:white; width:100%" onclick="nextQuiz()">새 문제</button><div id="quizBox" style="display:none; margin-top:20px;"><button class="btn" style="background:var(--success); color:white" onclick="playQuizSound()">🔊 다시 듣기</button><div id="quizWord" style="font-size:28px; font-weight:bold; margin:20px 0; visibility:hidden;">? ? ?</div><button class="btn" style="background:#bdc3c7" onclick="document.getElementById('quizWord').style.visibility='visible'">정답 확인</button></div></div>
         </div>
+
         <div id="ai-page" class="page">
             <div class="card">
-                <h3>🤖 AI 대화房 (Gemini v1.0.7)</h3>
+                <h3>🤖 AI 대화방 (Gemini v1.0.8)</h3>
                 <input type="password" id="apiKey" placeholder="在此貼上 API Key">
                 <div id="aiChat" class="chat-bubble">안녕하세요! 오늘 기분이 어때요?</div>
                 <div style="display: flex; gap: 5px; margin-bottom: 10px;"><input type="text" id="aiTextInput" placeholder="輸入韓文..." style="margin-bottom:0"><button class="btn" style="background:var(--accent); color:white" onclick="sendTextToAI()">傳送</button></div>
@@ -60,8 +64,10 @@
                 <div id="aiUserText" style="font-style:italic; color:var(--accent); min-height:24px; margin-top:10px;"></div>
             </div>
         </div>
+        
         <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:30px;"><button class="btn" style="background:#95a5a6; color:white; font-size:12px" onclick="exportData()">📤 備份</button><button class="btn" style="background:#95a5a6; color:white; font-size:12px" onclick="importData()">📥 匯入</button></div>
     </div>
+
     <script>
         const STORAGE_KEY = 'myKoreanApp_v2'; 
         let currentQuiz = null;
@@ -71,14 +77,15 @@
             processReadingText(localStorage.getItem('readingText') || "내용을 입력하세요."); 
         });
 
+        // --- 跳轉 Naver 字典 ---
         function openNaver(w) { 
             const c = w.replace(/[.,!?;:()"'“”]/g, "").trim(); 
             if (c) window.open("https://zh.dict.naver.com/#/search?query=" + encodeURIComponent(c), '_blank'); 
         }
 
+        // --- 🤖 Gemini API: 使用最穩定的 gemini-pro 模型 ---
         async function callGemini(key, text) {
-            // 使用 v1beta 最穩定的完整模型路徑
-            const url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=" + key.trim();
+            const url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=" + key.trim();
             try {
                 const res = await fetch(url, {
                     method: 'POST',
@@ -101,7 +108,7 @@
         async function sendTextToAI() {
             const k = document.getElementById('apiKey').value; 
             const t = document.getElementById('aiTextInput').value.trim();
-            if(!k || !t) return alert("請輸入內容");
+            if(!k || !t) return alert("請貼上 Key 並輸入內容");
             document.getElementById('aiUserText').innerText = "나: " + t;
             document.getElementById('aiChat').innerText = "AI 생각 중...";
             const r = await callGemini(k, t);
@@ -114,6 +121,8 @@
             const Rec = window.SpeechRecognition || window.webkitSpeechRecognition;
             if (!Rec) return alert("不支援語音");
             const rec = new Rec(); rec.lang = 'ko-KR';
+            rec.onstart = () => document.getElementById('aiMicBtn').style.opacity = 0.5;
+            rec.onend = () => document.getElementById('aiMicBtn').style.opacity = 1;
             rec.onresult = async (e) => {
                 const m = e.results[0][0].transcript;
                 document.getElementById('aiUserText').innerText = "나: " + m;
@@ -124,6 +133,7 @@
             rec.start();
         }
 
+        // --- 基礎功能 ---
         function processReadingText(t) { 
             const area = document.getElementById('displayArea'); 
             area.innerHTML = ''; 
